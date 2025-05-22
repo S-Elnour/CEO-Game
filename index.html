@@ -6,172 +6,174 @@
   <title>Global Supply Chain Simulator</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      background: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #f0f4f8, #dbe9f4);
+      margin: 0;
+      padding: 0;
       color: #333;
-      max-width: 800px;
-      margin: auto;
     }
-    h1, h2 {
+    header {
+      background: #003366;
+      color: white;
+      padding: 20px;
       text-align: center;
     }
+    #game {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .choice {
+      display: inline-block;
+      margin: 15px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      width: 240px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .choice:hover {
+      border-color: #007acc;
+      box-shadow: 0 0 10px #007acc66;
+    }
+    .choice img {
+      width: 100%;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .choice p {
+      margin: 0;
+      padding: 10px;
+      background: #f9f9f9;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
     button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-    }
-    .choices button {
-      margin: 5px;
-    }
-    #log {
-      background: white;
-      border: 1px solid #ccc;
-      padding: 15px;
       margin-top: 20px;
-      white-space: pre-wrap;
-      min-height: 200px;
+      padding: 12px 24px;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 40px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      display: none;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Global Supply Chain Simulator</h1>
+    <p>You are the CEO of H&M. Make smart decisions!</p>
+  </header>
 
-  <h1>Global Supply Chain Simulator</h1>
-  <h2>Be the CEO of H&M</h2>
-  <div id="log"></div>
-  <div id="controls"></div>
+  <div id="game"></div>
+  <div id="result"></div>
 
   <script>
-    const log = document.getElementById("log");
-    const controls = document.getElementById("controls");
+    const gameContainer = document.getElementById("game");
+    const resultContainer = document.getElementById("result");
 
     let year = 1;
     let profit = 0;
     let pollution = 0;
     let fairness = 100;
-    let employees = 500;
-    let salary = 1000;
+    const employees = 500;
+    const salary = 1000;
     let marketingBudget = 200;
 
-    function appendLog(text) {
-      log.textContent += text + "\n";
-    }
+    const stages = [
+      {
+        title: "Choose a Factory Location",
+        options: [
+          { img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Factory_Bangladesh.jpg/800px-Factory_Bangladesh.jpg", label: "Bangladesh – High profit, low fairness", apply: () => { profit += 1000; fairness -= 40; } },
+          { img: "https://upload.wikimedia.org/wikipedia/commons/4/41/German_factory.jpg", label: "Germany – Low profit, high fairness", apply: () => { profit += 400; fairness += 20; } },
+          { img: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Mexico_factory.jpg", label: "Mexico – Balanced option", apply: () => { profit += 700; fairness += 5; } }
+        ]
+      },
+      {
+        title: "Choose Material Source",
+        options: [
+          { img: "https://upload.wikimedia.org/wikipedia/commons/5/54/Eco_fabric.jpg", label: "Eco-friendly – costly, fair", apply: () => { profit += 300; pollution += 10; fairness += 10; } },
+          { img: "https://upload.wikimedia.org/wikipedia/commons/0/0d/China_textiles.jpg", label: "China imports – cheap, polluting", apply: () => { profit += 800; pollution += 60; fairness -= 10; } },
+          { img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Mixed_materials.jpg", label: "Mixed materials", apply: () => { profit += 500; pollution += 30; } }
+        ]
+      },
+      {
+        title: "Choose Shipping Method",
+        options: [
+          { img: "https://upload.wikimedia.org/wikipedia/commons/9/93/Air_cargo.jpg", label: "Air – fast, high pollution", apply: () => { profit += 400; pollution += 50; } },
+          { img: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Container_ship.jpg", label: "Sea – slow, eco-friendly", apply: () => { profit += 200; pollution += 10; } },
+          { img: "https://upload.wikimedia.org/wikipedia/commons/0/04/Rail_and_ship.jpg", label: "Rail + Sea – balanced", apply: () => { profit += 300; pollution += 25; } }
+        ]
+      },
+      {
+        title: "Marketing Budget Decision",
+        options: [
+          { img: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Marketing_strategy.jpg", label: "Boost marketing – Costs $100", apply: () => { profit -= 100; fairness += 10; marketingBudget += 100; } },
+          { img: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Savings_box.jpg", label: "No extra marketing", apply: () => {} }
+        ]
+      }
+    ];
 
-    function clearControls() {
-      controls.innerHTML = "";
-    }
+    const globalEvents = [
+      () => { profit -= 200; alert("Global shipping delays – Lost $200 in logistics."); },
+      () => { fairness += 15; alert("Green energy grant – Fairness improved."); },
+      () => { profit -= 100; alert("Factory accident – Repairs cost $100."); }
+    ];
 
-    function startGame() {
-      appendLog("===================================");
-      appendLog(" GLOBAL SUPPLY CHAIN SIMULATOR");
-      appendLog("===================================");
-      appendLog("Welcome, CEO of H&M.");
-      appendLog(`Your company has ${employees} employees, each earning $${salary}/month.`);
-      appendLog(`Your marketing budget is $${marketingBudget}K per year.`);
-      appendLog("Make smart decisions that balance profit, fairness, and the environment.\n");
-
-      nextYear();
-    }
-
-    function nextYear() {
-      if (year > 4) return showResults();
-
-      appendLog(`\n===== YEAR ${year} =====`);
-      chooseFactory();
-    }
-
-    function chooseFactory() {
-      appendLog("\nChoose factory location:");
-      const options = [
-        { label: "1. Bangladesh – High profit, low fairness", action: () => { profit += 1000; fairness -= 40; chooseMaterials(); } },
-        { label: "2. Germany – Low profit, high fairness", action: () => { profit += 400; fairness += 20; chooseMaterials(); } },
-        { label: "3. Mexico – Balanced option", action: () => { profit += 700; fairness += 5; chooseMaterials(); } }
-      ];
-      showChoices(options);
-    }
-
-    function chooseMaterials() {
-      appendLog("\nChoose material source:");
-      const options = [
-        { label: "1. Local and eco-friendly – higher cost", action: () => { profit += 300; pollution += 10; fairness += 10; chooseShipping(); } },
-        { label: "2. Imported from China – more pollution", action: () => { profit += 800; pollution += 60; fairness -= 10; chooseShipping(); } },
-        { label: "3. Mixed sourcing", action: () => { profit += 500; pollution += 30; chooseShipping(); } }
-      ];
-      showChoices(options);
-    }
-
-    function chooseShipping() {
-      appendLog("\nChoose shipping method:");
-      const options = [
-        { label: "1. Air – Fast, high pollution", action: () => { profit += 400; pollution += 50; manageMarketing(); } },
-        { label: "2. Sea – Eco-friendly, slower", action: () => { profit += 200; pollution += 10; manageMarketing(); } },
-        { label: "3. Rail + Sea – Balanced", action: () => { profit += 300; pollution += 25; manageMarketing(); } }
-      ];
-      showChoices(options);
-    }
-
-    function manageMarketing() {
-      appendLog("\nWould you like to increase your marketing budget?");
-      const options = [
-        { label: "1. Yes – Cost $100, boosts fairness", action: () => { profit -= 100; fairness += 10; marketingBudget += 100; globalEvent(); } },
-        { label: "2. No – Save money", action: () => { globalEvent(); } }
-      ];
-      showChoices(options);
-    }
-
-    function globalEvent() {
-      const event = Math.floor(Math.random() * 3) + 1;
-      if (event === 1) {
-        appendLog("\nGlobal shipping delays – Lost $200.");
-        profit -= 200;
-      } else if (event === 2) {
-        appendLog("\nGreen energy grant – Fairness improved.");
-        fairness += 15;
-      } else {
-        appendLog("\nFactory accident – Repairs cost $100.");
-        profit -= 100;
+    function renderStage(stageIndex) {
+      if (stageIndex >= stages.length) {
+        globalEvents[Math.floor(Math.random() * globalEvents.length)]();
+        year++;
+        if (year > 4) {
+          showResult();
+          return;
+        }
+        stageIndex = 0;
       }
 
-      year++;
-      setTimeout(nextYear, 500);
-    }
+      const stage = stages[stageIndex];
+      gameContainer.innerHTML = `<h2>Year ${year}: ${stage.title}</h2>`;
 
-    function showResults() {
-      appendLog("\n========== FINAL REPORT ==========");
-      appendLog(`Years Simulated: ${year - 1}`);
-      appendLog(`Total Profit: $${profit}K`);
-      appendLog(`Pollution Level: ${pollution}`);
-      appendLog(`Fairness Score: ${fairness}/100`);
-      appendLog(`Marketing Budget Used: $${marketingBudget}K`);
-      appendLog(`Employee Base: ${employees} workers at $${salary}/month`);
-
-      appendLog("\n=== Performance Summary ===");
-      appendLog(profit > 2500 ? "Great job driving strong profits." : "Consider more profitable strategies.");
-      appendLog(pollution <= 50 ? "Excellent environmental responsibility." :
-                 pollution <= 100 ? "Moderate environmental impact." : "High pollution – Consider greener options.");
-      appendLog(fairness >= 90 ? "You treated workers very fairly." :
-                 fairness >= 60 ? "Fair practices overall." : "Unfair practices hurt your brand.");
-
-      appendLog("\nThank you for playing.");
-      clearControls();
-      const btn = document.createElement("button");
-      btn.textContent = "Restart Game";
-      btn.onclick = () => location.reload();
-      controls.appendChild(btn);
-    }
-
-    function showChoices(options) {
-      clearControls();
-      options.forEach(option => {
-        const btn = document.createElement("button");
-        btn.textContent = option.label;
-        btn.onclick = option.action;
-        controls.appendChild(btn);
+      stage.options.forEach((opt, i) => {
+        const div = document.createElement("div");
+        div.className = "choice";
+        div.innerHTML = `<img src="${opt.img}" alt=""><p>${opt.label}</p>`;
+        div.onclick = () => {
+          opt.apply();
+          renderStage(stageIndex + 1);
+        };
+        gameContainer.appendChild(div);
       });
     }
 
-    startGame();
+    function showResult() {
+      gameContainer.style.display = "none";
+      resultContainer.style.display = "block";
+      resultContainer.innerHTML = `
+        <h2>Final Report</h2>
+        <p><strong>Years Simulated:</strong> 4</p>
+        <p><strong>Profit:</strong> $${profit}K</p>
+        <p><strong>Pollution:</strong> ${pollution}</p>
+        <p><strong>Fairness:</strong> ${fairness}/100</p>
+        <p><strong>Marketing Budget Used:</strong> $${marketingBudget}K</p>
+        <p><strong>Employees:</strong> ${employees} workers at $${salary}/month</p>
+        <h3>Performance Summary</h3>
+        <p>${profit > 2500 ? "Great job driving strong profits." : "Consider more profitable strategies."}</p>
+        <p>${pollution <= 50 ? "Excellent environmental responsibility." : pollution <= 100 ? "Moderate environmental impact." : "High pollution – Consider greener options."}</p>
+        <p>${fairness >= 90 ? "You treated workers very fairly." : fairness >= 60 ? "Fair practices overall." : "Unfair practices hurt your image."}</p>
+      `;
+    }
+
+    renderStage(0);
   </script>
 </body>
 </html>
