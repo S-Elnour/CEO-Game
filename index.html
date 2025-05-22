@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Supply Chain Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background: #f0f4f8;
+      color: #333;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .choices button {
+      margin: 5px;
+    }
+    #log {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Global Supply Chain Simulator</h1>
+  <h2>Be the CEO of H&M</h2>
+  <div id="log"></div>
+  <div id="controls"></div>
+
+  <script>
+    const log = document.getElementById("log");
+    const controls = document.getElementById("controls");
+
+    let year = 1;
+    let profit = 0;
+    let pollution = 0;
+    let fairness = 100;
+    let employees = 500;
+    let salary = 1000;
+    let marketingBudget = 200;
+
+    function appendLog(text) {
+      log.textContent += text + "\n";
+    }
+
+    function clearControls() {
+      controls.innerHTML = "";
+    }
+
+    function startGame() {
+      appendLog("===================================");
+      appendLog(" GLOBAL SUPPLY CHAIN SIMULATOR");
+      appendLog("===================================");
+      appendLog("Welcome, CEO of H&M.");
+      appendLog(`Your company has ${employees} employees, each earning $${salary}/month.`);
+      appendLog(`Your marketing budget is $${marketingBudget}K per year.`);
+      appendLog("Make smart decisions that balance profit, fairness, and the environment.\n");
+
+      nextYear();
+    }
+
+    function nextYear() {
+      if (year > 4) return showResults();
+
+      appendLog(`\n===== YEAR ${year} =====`);
+      chooseFactory();
+    }
+
+    function chooseFactory() {
+      appendLog("\nChoose factory location:");
+      const options = [
+        { label: "1. Bangladesh – High profit, low fairness", action: () => { profit += 1000; fairness -= 40; chooseMaterials(); } },
+        { label: "2. Germany – Low profit, high fairness", action: () => { profit += 400; fairness += 20; chooseMaterials(); } },
+        { label: "3. Mexico – Balanced option", action: () => { profit += 700; fairness += 5; chooseMaterials(); } }
+      ];
+      showChoices(options);
+    }
+
+    function chooseMaterials() {
+      appendLog("\nChoose material source:");
+      const options = [
+        { label: "1. Local and eco-friendly – higher cost", action: () => { profit += 300; pollution += 10; fairness += 10; chooseShipping(); } },
+        { label: "2. Imported from China – more pollution", action: () => { profit += 800; pollution += 60; fairness -= 10; chooseShipping(); } },
+        { label: "3. Mixed sourcing", action: () => { profit += 500; pollution += 30; chooseShipping(); } }
+      ];
+      showChoices(options);
+    }
+
+    function chooseShipping() {
+      appendLog("\nChoose shipping method:");
+      const options = [
+        { label: "1. Air – Fast, high pollution", action: () => { profit += 400; pollution += 50; manageMarketing(); } },
+        { label: "2. Sea – Eco-friendly, slower", action: () => { profit += 200; pollution += 10; manageMarketing(); } },
+        { label: "3. Rail + Sea – Balanced", action: () => { profit += 300; pollution += 25; manageMarketing(); } }
+      ];
+      showChoices(options);
+    }
+
+    function manageMarketing() {
+      appendLog("\nWould you like to increase your marketing budget?");
+      const options = [
+        { label: "1. Yes – Cost $100, boosts fairness", action: () => { profit -= 100; fairness += 10; marketingBudget += 100; globalEvent(); } },
+        { label: "2. No – Save money", action: () => { globalEvent(); } }
+      ];
+      showChoices(options);
+    }
+
+    function globalEvent() {
+      const event = Math.floor(Math.random() * 3) + 1;
+      if (event === 1) {
+        appendLog("\nGlobal shipping delays – Lost $200.");
+        profit -= 200;
+      } else if (event === 2) {
+        appendLog("\nGreen energy grant – Fairness improved.");
+        fairness += 15;
+      } else {
+        appendLog("\nFactory accident – Repairs cost $100.");
+        profit -= 100;
+      }
+
+      year++;
+      setTimeout(nextYear, 500);
+    }
+
+    function showResults() {
+      appendLog("\n========== FINAL REPORT ==========");
+      appendLog(`Years Simulated: ${year - 1}`);
+      appendLog(`Total Profit: $${profit}K`);
+      appendLog(`Pollution Level: ${pollution}`);
+      appendLog(`Fairness Score: ${fairness}/100`);
+      appendLog(`Marketing Budget Used: $${marketingBudget}K`);
+      appendLog(`Employee Base: ${employees} workers at $${salary}/month`);
+
+      appendLog("\n=== Performance Summary ===");
+      appendLog(profit > 2500 ? "Great job driving strong profits." : "Consider more profitable strategies.");
+      appendLog(pollution <= 50 ? "Excellent environmental responsibility." :
+                 pollution <= 100 ? "Moderate environmental impact." : "High pollution – Consider greener options.");
+      appendLog(fairness >= 90 ? "You treated workers very fairly." :
+                 fairness >= 60 ? "Fair practices overall." : "Unfair practices hurt your brand.");
+
+      appendLog("\nThank you for playing.");
+      clearControls();
+      const btn = document.createElement("button");
+      btn.textContent = "Restart Game";
+      btn.onclick = () => location.reload();
+      controls.appendChild(btn);
+    }
+
+    function showChoices(options) {
+      clearControls();
+      options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.textContent = option.label;
+        btn.onclick = option.action;
+        controls.appendChild(btn);
+      });
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
